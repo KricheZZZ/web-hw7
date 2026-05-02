@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аудит безопасности – Лабораторная работа №7</title>
+    <style>
+        /* ===== Стили пользователя u82315 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0b2b4e 0%, #1a4a6f 100%);
+            color: #eef2ff;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            position: relative;
+        }
+
+        
+        #bgVideo {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -2;
+            object-fit: cover;
+            filter: brightness(0.5);
+            pointer-events: none;
+        }
+
+        /* Шапка сайта */
+        .site-header {
+            background: rgba(10, 30, 50, 0.85);
+            backdrop-filter: blur(5px);
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: 1px solid #3a86ff;
+            margin-bottom: 30px;
+        }
+        .header-content h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, #fff, #87cefa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .header-content p {
+            color: #b0c4de;
+        }
+
+        /* Подвал */
+        .site-footer {
+            background: rgba(10, 30, 50, 0.85);
+            backdrop-filter: blur(5px);
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            border-top: 1px solid #3a86ff;
+            font-size: 0.9rem;
+            color: #b0c4de;
+        }
+
+        /* Контейнер формы (основной блок) */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(2px);
+            border-radius: 28px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #fff, #87cefa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            margin: 30px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3a86ff;
+            display: inline-block;
+        }
+
+        .vuln-block {
+            background: rgba(10, 30, 50, 0.7);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 35px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .vuln-block:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+        }
+
+        .vuln-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #87cefa;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #3a86ff;
+            padding-bottom: 8px;
+        }
+
+        .problem, .threat, .solution {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .problem strong, .threat strong, .solution strong {
+            color: #87cefa;
+        }
+
+        .screenshot {
+            text-align: center;
+            margin: 20px 0;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 20px;
+            border: 1px solid #3a86ff;
+        }
+        .screenshot img {
+            max-width: 100%;
+            border-radius: 16px;
+            border: 1px solid #3a86ff;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+            transition: 0.2s;
+        }
+        .screenshot img:hover {
+            transform: scale(1.01);
+        }
+        .caption {
+            margin-top: 12px;
+            font-style: italic;
+            color: #b0c4de;
+            font-size: 0.9rem;
+        }
+
+        code {
+            background: #0a1e2e;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            color: #ffd966;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 35px;
+            border-top: 1px solid #3a86ff;
+            padding-top: 20px;
+        }
+        .back-link a {
+            background: #3a86ff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .back-link a:hover {
+            background: #2666cc;
+            transform: translateY(-2px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #2a3a5a;
+            padding: 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background: #1a2a4a;
+            color: #87cefa;
+            font-weight: 600;
+        }
+        tr:hover {
+            background: rgba(58, 134, 255, 0.2);
+        }
+
+        @media (max-width: 860px) {
+            .container { padding: 20px; }
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+ <video id="bgVideo" autoplay loop muted playsinline poster="poster.jpg">
+        <source src="background.mp4" type="video/mp4">
+    </video>
+
+
+
+
+    <div class="site-header">
+        <div class="header-content">
+            <h1> Аудит безопасности</h1>
+            <p>Лабораторная работа №7 – анализ и исправление уязвимостей</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- ========== 1. XSS ========== -->
+        <h2>1. XSS (межсайтовый скриптинг)</h2>
+        <div class="vuln-block">
+            <div class="vuln-title">🔍 Проблема</div>
+            <div class="problem">
+                <strong>Описание:</strong> Данные, введённые пользователем (ФИО, телефон, биография и т.д.), а также данные, извлечённые из базы, выводились в HTML-страницы без какого-либо экранирования. Это позволяло злоумышленнику внедрять вредоносный JavaScript-код через поля формы или параметры URL.
+            </div>
+            <div class="threat">
+                <strong>Чем грозило:</strong> Кража сессионных cookies (перехват авторизации), перенаправление на фишинговые сайты, подмена содержимого страницы (дефейс), выполнение действий от имени пользователя (например, изменение анкеты без его ведома).
+            </div>
+            <div class="solution">
+                <strong>Решение:</strong> Применена функция <code>htmlspecialchars()</code> ко всем данным, которые выводятся внутри HTML-тегов. Функция заменяет специальные символы (&lt; &gt; &quot; &#039; &amp;) на HTML-сущности, что нейтрализует любой потенциальный скрипт. На скриншотах ниже показано экранирование в форме добавления/редактирования и при выводе таблицы анкет.
+            </div>
+            <div class="screenshot">
+                <img src="1_xss.png" alt="Экранирование в форме ввода">
+                <div class="caption">Скриншот 1: Значения полей фамилия, имя, отчество экранируются через htmlspecialchars() при отображении формы.</div>
+            </div>
+            <div class="screenshot">
+                <img src="2_xss.png" alt="Экранирование при выводе данных">
+                <div class="caption">Скриншот 2: При просмотре списка анкет (view.php) все поля также пропущены через htmlspecialchars(), что исключает XSS.</div>
+            </div>
+        </div>
+
+        <!-- ========== 2. Information Disclosure ========== -->
+        <h2>2. Information Disclosure (раскрытие информации)</h2>
+        <div class="vuln-block">
+            <div class="vuln-title">🔍 Проблема</div>
+            <div class="problem">
+                <strong>Описание:</strong> В исходном коде приложения при возникновении ошибки подключения к базе данных или ошибки выполнения SQL-запроса происходил прямой вывод деталей исключения через <code>die("Ошибка БД: " . $e->getMessage())</code>. На экран попадал полный текст ошибки: логин, хост, имя базы, фрагменты SQL-запроса, пути к файлам.
+            </div>
+            <div class="threat">
+                <strong>Чем грозило:</strong> Злоумышленник мог узнать внутреннюю структуру базы данных (имена таблиц, полей), версию СУБД, расположение файлов на сервере, что значительно упрощает подготовку целенаправленных атак (SQL-инъекции, подбор паролей и т.д.).
+            </div>
+            <div class="solution">
+                <strong>Решение:</strong> Прямой вывод сообщения исключения был заменён на универсальное сообщение «Ошибка. Попробуйте позже.», а подробности ошибки отправляются в серверный лог с помощью <code>error_log()</code>. Пользователь не получает никакой технической информации, что не даёт злоумышленнику возможности для разведки.
+            </div>
+            <div class="screenshot">
+                <img src="4_id.png" alt="Уязвимый код – вывод деталей ошибки">
+                <div class="caption">Скриншот 3 (уязвимость): Использование die($e->getMessage()) – вся информация об ошибке показывается пользователю.</div>
+            </div>
+            <div class="screenshot">
+                <img src="5_id.png" alt="Исправленный код – логирование ошибки">
+                <div class="caption">Скриншот 4 (исправление): Ошибка логируется через error_log(), а пользователь видит только общее сообщение.</div>
+            </div>
+        </div>
+
+        <!-- ========== 3. SQL Injection ========== -->
+        <h2>3. SQL Injection</h2>
+        <div class="vuln-block">
+            <div class="vuln-title">🔍 Проблема</div>
+            <div class="problem">
+                <strong>Описание:</strong> В некоторых местах приложения (до исправления) использовалась конкатенация пользовательских данных в SQL-запросах. Это позволяло злоумышленнику модифицировать структуру запроса, вставляя собственные SQL-команды.
+            </div>
+            <div class="threat">
+                <strong>Чем грозило:</strong> Полный компрометация базы данных: чтение любых таблиц (включая логины и пароли), удаление или изменение данных анкет, получение прав администратора, а в некоторых случаях – выполнение команд на сервере через расширенные возможности СУБД.
+            </div>
+            <div class="solution">
+                <strong>Решение:</strong> Во всех взаимодействиях с базой данных используются подготовленные запросы (prepared statements) через POD – метод <code>prepare()</code> с плейсхолдерами (<code>:id</code>, <code>:full_name</code> и т.д.) и последующий <code>execute()</code>. Благодаря этому пользовательские данные всегда передаются отдельно от кода SQL и не могут изменить логику запроса. Даже если злоумышленник попытается внедрить код, он будет интерпретирован как обычная строка.
+            </div>
+            <div class="screenshot">
+                <img src="3_SQL.png" alt="Подготовленный запрос с плейсхолдерами">
+                <div class="caption">Скриншот 5: Пример подготовленного запроса – используются именованные плейсхолдеры, значения передаются отдельно через execute(). Инъекция невозможна.</div>
+            </div>
+        </div>
+
+        <!-- ========== 4. Include / Upload уязвимости ========== -->
+        <h2>4. Include и Upload уязвимости</h2>
+        <div class="vuln-block">
+            <div class="vuln-title">🔍 Проблема</div>
+            <div class="problem">
+                <strong>Описание:</strong> Потенциальная опасность заключалась в динамическом включении файлов (например, через параметр <code>?page=...</code>) и отсутствии контроля за загружаемыми файлами, что могло привести к выполнению произвольного кода на сервере.
+            </div>
+            <div class="threat">
+                <strong>Чем грозило:</strong> 
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>LFI (Local File Inclusion) – чтение конфиденциальных файлов сервера (например, /etc/passwd, файлы конфигурации).</li>
+                    <li>RFI (Remote File Inclusion) – выполнение вредоносного скрипта с удалённого сервера, полный захват веб-приложения.</li>
+                    <li>Загрузка PHP-шелла через форму – злоумышленник мог загрузить файл с расширением .php и получить доступ к командной строке сервера.</li>
+                </ul>
+            </div>
+            <div class="solution">
+                <strong>Решение:</strong> 
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                    <li>Все <code>include/require</code> в проекте используют только фиксированные (константные) имена файлов, например <code>include 'anketka.php';</code> или <code>include 'config.php';</code>. Никакие данные от пользователя не участвуют в формировании пути включения.</li>
+                    <li>Функционал загрузки файлов полностью отсутствует в приложении (нет форм с <code>enctype="multipart/form-data"</code> и обработчиков <code>$_FILES</code>). Следовательно, уязвимость загрузки вредоносных файлов не существует.</li>
+                    <li>Дополнительно все временные и отладочные файлы (например, <code>test.php</code>) удалены из корня сервера.</li>
+                </ul>
+                <p style="margin-top: 10px;">Таким образом, атаки на включение файлов невозможны, а риск через загрузку отсутствует.</p>
+            </div>
+            <!-- Скриншот отсутствует по условию, поэтому блок без изображения -->
+            <div class="screenshot" style="background: rgba(0,0,0,0.2);">
+                <div class="caption">📄 Все include – статические, загрузка файлов не используется.</div>
+            </div>
+        </div>
+
+        <!-- Итоговая таблица (без CSRF) -->
+        <div class="vuln-block">
+            <div class="vuln-title">📊 Итоговая таблица устранённых уязвимостей</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Уязвимость</th>
+                        <th>Метод защиты / исправление</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>XSS (межсайтовый скриптинг)</td>
+                        <td>htmlspecialchars() при любом выводе в HTML</td>
+                    </tr>
+                    <tr>
+                        <td>Information Disclosure (раскрытие информации)</td>
+                        <td>Скрытие деталей ошибок от пользователя, логирование в error_log()</td>
+                    </tr>
+                    <tr>
+                        <td>SQL Injection</td>
+                        <td>Подготовленные запросы (PDO prepare/execute)</td>
+                    </tr>
+                    <tr>
+                        <td>Include / Upload</td>
+                        <td>Нет динамических include, отсутствует функционал загрузки файлов</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top: 20px;">Все выявленные уязвимости устранены. Приложение соответствует базовым требованиям безопасной разработки.</p>
+        </div>
+
+        <div class="back-link">
+            <a href="index.php">← Вернуться к анкете</a>
+        </div>
+    </div>
+
+    <div class="site-footer">
+        <p style="font-size: 0.8rem;">Уязвимости XSS, Information Disclosure, SQL Injection, Include/Upload проанализированы и исправлены.</p>
+    </div>
+</body>
+</html>
